@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Runner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="ui">
+            <div class="ui-panel">
+                <div class="ui-title">Score</div>
+                <div class="ui-value" id="scoreDisplay">0</div>
+            </div>
+            <div class="ui-panel">
+                <div class="ui-title">Coins</div>
+                <div class="ui-value" id="coinDisplay">0</div>
+            </div>
+            <div class="ui-panel">
+                <div class="ui-title">Level</div>
+                <div class="ui-value" id="levelDisplay">1</div>
+            </div>
+        </div>
+
+        <div class="controls-hint">
+            <div class="key-hint"><span class="key">A/D</span> Move</div>
+            <div class="key-hint"><span class="key">W/Space</span> Jump</div>
+            <div class="key-hint"><span class="key">F</span> Fullscreen</div>
+        </div>
+
+        <div id="startScreen">
+            <h1 class="game-title">NEON RUNNER</h1>
+            <p class="game-subtitle">Cyber Platform Adventure</p>
+            <button class="start-btn" id="startBtn">START GAME</button>
+        </div>
+
+        <div id="gameOverScreen">
+            <h1 class="game-title">GAME OVER</h1>
+            <p class="game-subtitle">Your Journey Ends</p>
+            <div class="final-score" id="finalScore">0</div>
+            <button class="start-btn" id="restartBtn">TRY AGAIN</button>
+        </div>
+    </div>
+</body>
+<script src="script.js"></script>
+</html>
