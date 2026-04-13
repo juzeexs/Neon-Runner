@@ -1,209 +1,349 @@
-:root {
-    --bg: #0a0a0f;
-    --fg: #e0e0e8;
-    --accent: #00ffaa;
-    --accent2: #ff00aa;
-    --muted: #2a2a3a;
-    --card: #12121a;
-}
+        :root {
+            --bg: #0a0a0f;
+            --fg: #e0e0e8;
+            --accent: #00ffaa;
+            --accent2: #ff00aa;
+            --muted: #2a2a3a;
+            --card: #12121a;
+        }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-body {
-    font-family: 'Rajdhani', sans-serif;
-    background: var(--bg);
-    color: var(--fg);
-    overflow: hidden;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            position: fixed; /* Impede scroll bounce no iOS */
+            inset: 0;
+        }
 
-#gameContainer {
-    position: relative;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(180deg, #0a0a1a 0%, #1a0a2a 50%, #0a1a2a 100%);
-}
+        #gameContainer {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #0a0a1a 0%, #1a0a2a 50%, #0a1a2a 100%);
+            width: 100%;
+            height: 100%;
+        }
 
-#gameCanvas {
-    display: block;
-    background: transparent;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-}
+        #gameCanvas {
+            display: block;
+            background: transparent;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            width: 100%;
+            height: 100%;
+        }
 
-#ui {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    right: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    pointer-events: none;
-    z-index: 10;
-}
+        /* ============================================
+           UI STYLES
+           ============================================ */
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 10;
+        }
 
-.ui-panel {
-    background: rgba(10, 10, 20, 0.85);
-    border: 1px solid rgba(0, 255, 170, 0.3);
-    border-radius: 8px;
-    padding: 12px 20px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 20px rgba(0, 255, 170, 0.1), inset 0 0 20px rgba(0, 0, 0, 0.5);
-}
+        .ui-panel {
+            background: rgba(10, 10, 20, 0.85);
+            border: 1px solid rgba(0, 255, 170, 0.3);
+            border-radius: 8px;
+            padding: 12px 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.1), inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
 
-.ui-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 4px;
-}
+        .ui-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
 
-.ui-value {
-    font-family: 'Orbitron', monospace;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--fg);
-}
+        .ui-value {
+            font-family: 'Orbitron', monospace;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--fg);
+        }
 
-.controls-hint {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    pointer-events: none;
-    z-index: 10;
-}
+        /* Esconde dicas de teclado no mobile */
+        .controls-hint {
+            display: flex;
+            gap: 20px;
+            pointer-events: none;
+            z-index: 10;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
-.key-hint {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
-}
+        .key-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
 
-.key {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    padding: 4px 10px;
-    font-family: 'Orbitron', monospace;
-    font-size: 11px;
-    color: var(--accent);
-}
+        .key {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
+            color: var(--accent);
+        }
 
-#startScreen, #gameOverScreen {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: rgba(10, 10, 20, 0.95);
-    z-index: 100;
-    backdrop-filter: blur(20px);
-}
+        /* ============================================
+           SCREENS (START/OVER)
+           ============================================ */
+        #startScreen, #gameOverScreen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 10, 20, 0.95);
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
 
-#gameOverScreen {
-    display: none;
-}
+        #gameOverScreen {
+            display: none;
+        }
 
-.game-title {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(32px, 8vw, 72px);
-    font-weight: 900;
-    letter-spacing: 4px;
-    color: var(--fg);
-    margin-bottom: 10px;
-}
+        .game-title {
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(32px, 8vw, 72px);
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: var(--fg);
+            margin-bottom: 10px;
+        }
 
-.game-subtitle {
-    font-size: clamp(14px, 3vw, 20px);
-    color: var(--accent);
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    margin-bottom: 40px;
-}
+        .game-subtitle {
+            font-size: clamp(14px, 3vw, 20px);
+            color: var(--accent);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+        }
 
-.start-btn {
-    font-family: 'Orbitron', monospace;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    padding: 16px 48px;
-    background: transparent;
-    border: 2px solid var(--accent);
-    color: var(--accent);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    pointer-events: auto;
-}
+        .start-btn {
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            padding: 16px 48px;
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            pointer-events: auto;
+        }
 
-.start-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--accent);
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    z-index: -1;
-}
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
 
-.start-btn:hover {
-    color: var(--bg);
-}
+        .start-btn:hover {
+            color: var(--bg);
+        }
 
-.start-btn:hover::before {
-    transform: translateX(0);
-}
+        .start-btn:hover::before {
+            transform: translateX(0);
+        }
 
-.final-score {
-    font-family: 'Orbitron', monospace;
-    font-size: 48px;
-    font-weight: 900;
-    color: var(--accent);
-    margin: 20px 0;
-}
+        .final-score {
+            font-family: 'Orbitron', monospace;
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--accent);
+            margin: 20px 0;
+        }
 
-@media (max-width: 768px) {
-    .controls-hint {
-        flex-wrap: wrap;
-        justify-content: center;
-        padding: 0 20px;
-    }
-            
-#ui {
-        flex-direction: column;
-        gap: 10px;
-    }
-            
-.ui-panel {
-        padding: 8px 14px;
-    }
-            
-.ui-value {
-        font-size: 18px;
-    }
-}
+        /* ============================================
+           MOBILE: LANDSCAPE WARNING
+           ============================================ */
+        #rotateWarning {
+            display: none; /* Escondido por padrão */
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            color: white;
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
 
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation: none !important;
-        transition: none !important;
-    }
-}
+        #rotateWarning svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            fill: var(--accent);
+            animation: rotateAnim 1.5s infinite ease-in-out;
+        }
+
+        @keyframes rotateAnim {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        /* Se for tela pequena (celular) E estiver em retrato, mostra o aviso */
+        @media (max-width: 600px) and (orientation: portrait) {
+            #rotateWarning {
+                display: flex;
+            }
+        }
+
+        /* ============================================
+           MOBILE: TOUCH CONTROLS
+           ============================================ */
+        .touch-controls {
+            display: none; /* Escondido no desktop */
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 140px;
+            padding: 0 20px 20px 20px;
+            pointer-events: none; /* Deixa os botões serem os únicos clicáveis */
+            z-index: 50;
+            touch-action: none;
+        }
+
+        /* Container para botões esquerda/direita */
+        .left-controls {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Container para botão de pulo */
+        .right-controls {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+        }
+
+        .touch-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(0, 255, 170, 0.15);
+            border: 2px solid rgba(0, 255, 170, 0.5);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            pointer-events: auto; /* Reativa o clique apenas nos botões */
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.2);
+            user-select: none;
+            transition: background 0.1s;
+        }
+
+        .touch-btn:active {
+            background: rgba(0, 255, 170, 0.4);
+            transform: scale(0.95);
+        }
+
+        .touch-btn.action-btn {
+            width: 90px;
+            height: 90px;
+            background: rgba(255, 0, 170, 0.15);
+            border-color: rgba(255, 0, 170, 0.5);
+            color: var(--accent2);
+            box-shadow: 0 0 15px rgba(255, 0, 170, 0.2);
+        }
+        
+        .touch-btn.action-btn:active {
+            background: rgba(255, 0, 170, 0.4);
+        }
+
+        /* Ícones SVG dentro dos botões */
+        .touch-btn svg {
+            width: 32px;
+            height: 32px;
+            fill: currentColor;
+        }
+
+        /* Mostra controles touch apenas em telas pequenas/touch */
+        @media (max-width: 1024px), (hover: none) {
+            .controls-hint {
+                display: none; /* Esconde dicas de teclado */
+            }
+            .touch-controls {
+                display: block;
+            }
+            #ui {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+            }
+            .ui-panel {
+                padding: 8px 12px;
+            }
+            .ui-value {
+                font-size: 18px;
+            }
+            .ui-title {
+                font-size: 8px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .touch-btn {
+                width: 60px;
+                height: 60px;
+            }
+            .touch-btn.action-btn {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }

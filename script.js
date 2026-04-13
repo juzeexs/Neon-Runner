@@ -375,7 +375,6 @@
                 });
             }
 
-            // Retorna o tile nas coordenadas do mundo
             getTileAtPixel(x, y) {
                 const tileX = Math.floor(x / CONFIG.TILE_SIZE);
                 const tileY = Math.floor(y / CONFIG.TILE_SIZE);
@@ -389,7 +388,7 @@
         }
 
         // ============================================
-        // PLAYER - SISTEMA DE COLISÃO CORRIGIDO
+        // PLAYER
         // ============================================
         class Player {
             constructor(x, y, spriteSheet) {
@@ -408,8 +407,6 @@
                 this.frameTimer = 0;
                 this.spriteSheet = spriteSheet;
                 this.alive = true;
-                
-                // Margem para evitar colisão com o chão ao andar
                 this.skinWidth = 1;
             }
 
@@ -435,21 +432,21 @@
                 this.vy += CONFIG.GRAVITY;
                 this.vy = Math.min(this.vy, CONFIG.MAX_FALL_SPEED);
 
-                // CORREÇÃO: Mover X e resolver colisão horizontal
+                // Collision X
                 this.x += this.vx;
                 this.resolveHorizontalCollision(tileMap);
 
-                // CORREÇÃO: Mover Y e resolver colisão vertical
+                // Collision Y
                 this.y += this.vy;
                 this.resolveVerticalCollision(tileMap);
 
-                // Update animation state
+                // Animation
                 this.updateAnimationState(deltaTime);
 
-                // Check hazards
+                // Hazards
                 this.checkHazards(tileMap);
 
-                // Check fall death
+                // Fall death
                 if (this.y > tileMap.height * CONFIG.TILE_SIZE + 100) {
                     this.alive = false;
                 }
@@ -458,10 +455,8 @@
             resolveHorizontalCollision(tileMap) {
                 const leftTile = Math.floor(this.x / CONFIG.TILE_SIZE);
                 const rightTile = Math.floor((this.x + this.width) / CONFIG.TILE_SIZE);
-                
                 const topY = this.y + this.skinWidth;
                 const bottomY = this.y + this.height - this.skinWidth;
-                
                 const topTile = Math.floor(topY / CONFIG.TILE_SIZE);
                 const bottomTile = Math.floor(bottomY / CONFIG.TILE_SIZE);
 
@@ -493,10 +488,8 @@
                 const topTile = Math.floor(this.y / CONFIG.TILE_SIZE);
                 const bottomTile = Math.floor((this.y + this.height) / CONFIG.TILE_SIZE);
 
-                // Caindo
                 if (this.vy > 0) {
                     this.onGround = false;
-                    
                     for (let tx = leftTile; tx <= rightTile; tx++) {
                         const tile = tileMap.getTileAtPixel(tx * CONFIG.TILE_SIZE + 1, this.y + this.height);
                         if (tile > 0) {
@@ -532,7 +525,6 @@
 
             updateAnimationState(deltaTime) {
                 this.frameTimer += deltaTime;
-                
                 if (this.frameTimer > 100) {
                     this.frameTimer = 0;
                     this.frameIndex++;
@@ -667,10 +659,7 @@
                             ctx.arc(wrappedX, el.y, el.size, 0, Math.PI * 2);
                             ctx.fill();
                         } else if (layerIndex === 1) {
-                            const gradient = ctx.createRadialGradient(
-                                wrappedX, el.y, 0,
-                                wrappedX, el.y, el.size
-                            );
+                            const gradient = ctx.createRadialGradient(wrappedX, el.y, 0, wrappedX, el.y, el.size);
                             gradient.addColorStop(0, `hsla(${el.hue}, 100%, 50%, 0.1)`);
                             gradient.addColorStop(0.5, `hsla(${el.hue}, 100%, 30%, 0.05)`);
                             gradient.addColorStop(1, 'transparent');
@@ -736,29 +725,63 @@
             }
 
             setupEventListeners() {
+                // Keyboard Events
                 window.addEventListener('keydown', (e) => {
                     this.keys[e.code] = true;
-                    
-                    if (e.code === 'KeyF') {
-                        this.toggleFullscreen();
-                    }
-                    
-                    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
-                        e.preventDefault();
-                    }
+                    if (e.code === 'KeyF') this.toggleFullscreen();
+                    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
                 });
 
                 window.addEventListener('keyup', (e) => {
                     this.keys[e.code] = false;
                 });
 
+                // Button Listeners
                 document.getElementById('startBtn').addEventListener('click', () => this.start());
                 document.getElementById('restartBtn').addEventListener('click', () => this.restart());
+
+                // Mobile Touch Controls Mapping
+                this.setupTouchControls();
+            }
+
+            setupTouchControls() {
+                const btnLeft = document.getElementById('btnLeft');
+                const btnRight = document.getElementById('btnRight');
+                const btnJump = document.getElementById('btnJump');
+
+                // Helper function to bind touch events to key states
+                const bindTouch = (element, keyCode) => {
+                    element.addEventListener('touchstart', (e) => {
+                        e.preventDefault(); // Prevent scrolling/zooming
+                        this.keys[keyCode] = true;
+                    }, { passive: false });
+
+                    element.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        this.keys[keyCode] = false;
+                    }, { passive: false });
+                    
+                    // If finger moves out of button, treat as release
+                    element.addEventListener('touchcancel', (e) => {
+                        this.keys[keyCode] = false;
+                    });
+                };
+
+                // Mapping virtual buttons to keyboard keys used in update()
+                bindTouch(btnLeft, 'KeyA');
+                bindTouch(btnRight, 'KeyD');
+                bindTouch(btnJump, 'Space');
             }
 
             toggleFullscreen() {
                 if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen();
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.log('Fullscreen not supported');
+                    });
+                    // Try to lock orientation on mobile
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(e => console.log('Orientation lock failed'));
+                    }
                 } else {
                     document.exitFullscreen();
                 }
@@ -769,6 +792,12 @@
                 this.running = true;
                 this.initLevel(1);
                 this.lastTime = performance.now();
+                
+                // Auto fullscreen on mobile start
+                if (window.innerWidth < 1024) {
+                    this.toggleFullscreen();
+                }
+                
                 this.gameLoop();
             }
 
@@ -807,7 +836,6 @@
 
             update(deltaTime) {
                 this.player.update(this.keys, this.tileMap, deltaTime);
-                
                 this.camera.follow(this.player, this.tileMap.width, this.tileMap.height);
 
                 const collected = this.player.checkCoins(this.tileMap);
@@ -833,11 +861,10 @@
 
                 const time = Date.now() / 1000;
                 this.parallax.draw(ctx, this.camera, time);
-
                 this.tileMap.draw(ctx, this.camera);
-
                 this.player.draw(ctx, this.camera);
 
+                // Draw Exit Zone indicator
                 const endX = (this.tileMap.width - 3) * CONFIG.TILE_SIZE - this.camera.x;
                 const endY = (this.tileMap.height - 5) * CONFIG.TILE_SIZE - this.camera.y;
                 
